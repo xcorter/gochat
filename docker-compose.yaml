@@ -2,4 +2,25 @@ version: '3.7'
 
 services:
   app:
-    image: golang:1.13-alphine
+    image: golang:1.13-alpine
+    build:
+      context: ./app
+#    working_dir: ./app
+    env_file:
+      - ./app/.env
+    volumes:
+      - ./app/:/app/
+#      - ./gopath/:/go/
+    ports:
+      - "8081:8081"
+
+  nginx:
+    image: nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend/:/data/www/chat/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+
+  redis:
+    image: "redis:alpine"

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+
+    <style>
+        body {
+            background-color: gray;
+        }
+        .container {
+            width: 800px;
+            background-color: beige;
+            min-height: 600px;
+        }
+        .chat {
+            float: left;
+            border: 1px solid black;
+            width: 600px;
+        }
+
+        .panel {
+            float: right;
+        }
+
+        .clearfix::after {
+            display: block;
+            content: "";
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+<div class="container clearfix">
+    <div class="chat">
+        <h2>Welcome!</h2>
+
+        <div id="messages">
+
+        </div>
+    </div>
+    <div class="panel">
+        <form name="form">
+            <div>
+                <input name="username" placeholder="username">
+            </div>
+            <div>
+                <textarea name="message" placeholder="text"></textarea>
+            </div>
+            <div>
+                <input type="submit"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var socket = new WebSocket("ws://localhost:8081/ws?threadId=1");
+
+    socket.onopen = function() {
+        console.log("Соединение установлено.");
+    };
+
+    socket.onclose = function(event) {
+        console.log(event);
+    };
+
+    socket.onmessage = function(event) {
+        let messagesEl = document.getElementById('messages');
+        let p = document.createElement('p');
+        let data = JSON.parse(event.data);
+        p.innerHTML = "<strong>" + data.username + "</strong> " + data.message;
+        messagesEl.append(p);
+    };
+
+    socket.onerror = function(error) {
+        console.log(error);
+        alert("Ошибка " + error.message);
+    };
+
+    document.forms.form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var data = {
+            username: e.target.elements.username.value,
+            message: e.target.elements.message.value,
+            threadId: 1
+        };
+        socket.send(JSON.stringify(data));
+        return false;
+    });
+
+    function sendMessage(e) {
+        socket.send('Privet');
+        return false;
+    }
+
+</script>
+</body>
+</html>
